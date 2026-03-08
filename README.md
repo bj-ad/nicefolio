@@ -392,17 +392,28 @@ IBKR:
 Controls scheduler timing, caching, logging, notification channels, and more:
 
 ```yaml
-scheduler:
-  daily_jobs:
-    start_hour: 5
-    start_minute: 30
-    sleep_between_jobs: 120
-  snapshot_hour: 23
-  position_reconciliation_hour: 22
+  start_hour: 1
+  start_minute: 0
+  sleep_between_jobs: 60 # Sleep time between jobs (in seconds)
 
-portfolio:
-  lot_method: FIFO
-  snapshot_retention_days: 0  # Keep all snapshots
+  # Weekly jobs day (for lot recreation, rolling window, position recreation)
+  weekly_jobs_day: sunday # Options: monday, tuesday, wednesday, thursday, friday, saturday, sunday
+
+  # Position recreation settings (weekly self-correction)
+  position_recreation_enabled: true
+
+  # Rolling window snapshots recreation settings
+  rolling_window_enabled: true
+  rolling_window_frequency: weekly # Options: daily, weekly
+
+  # GAP DETECTION AND AUTO-FIX (Checks for missing data when worker starts)
+  #    - Detects gaps in FX rates and market data
+  #    - Automatically runs backfill scripts to fill gaps (standard behavior)
+  #    - Sends notifications ONLY if automatic fix fails
+  #    - FX gaps: Always checked (not filtered by positions) - tax compliance
+  #    - Market data gaps: Only for symbols with active positions (quantity != 0)
+  backfill_on_startup: true
+  backfill_lookback_days: 7 # How many days to check for missing data
 ```
 
 ---
