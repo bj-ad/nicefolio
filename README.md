@@ -46,7 +46,7 @@ A dedicated `audit_service.py` (1,573 lines) performs a weekly three-part positi
 |---|---|
 | **FIFO lot tracking** | Full First-In-First-Out lot accounting per ISIN globally (not per account), as required by § 20 EStG. Tax lots track acquisition cost, all fees, and realized gain/loss on disposal. |
 | **ECB exchange rates** | FX conversions use official European Central Bank reference rates — explicitly enforced in code with the comment *"German tax law requires ECB rates for FX conversions. yfinance FX data is NOT acceptable for tax compliance."* |
-| **ECB publication timing** | A dedicated validator prevents using unpublished or future ECB rates, respecting the 17:00 CET publication window |
+| **ECB publication timing** | A dedicated validator prevents using unpublished or future ECB rates, respecting the 16:00 CET publication window with a 1 hour buffer |
 | **FX rate audit trail** | Every transaction records its FX rate source. When a fallback rate is used (e.g., previous business day), the source and age are annotated in the transaction notes |
 | **Foreign currency lots** | Separate lot tracking for foreign currency positions (USD, THB) to capture FX gains/losses on conversion |
 | **Withholding tax tracking** | Tax amount, currency, and country stored per transaction for cross-border tax credit claims |
