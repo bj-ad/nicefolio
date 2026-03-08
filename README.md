@@ -323,7 +323,7 @@ nicefolio/
 │
 ├── compose.dev.yaml                # Docker Compose — development
 ├── compose.prod.yaml               # Docker Compose — production (3 containers)
-├── env.example                    # Environment variable template
+├── env.example                     # Environment variable template
 ├── docker-entrypoint.sh            # Container entry point script
 └── requirements.txt                # Python dependencies
 ```
