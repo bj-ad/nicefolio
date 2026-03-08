@@ -529,7 +529,7 @@ The Docker entrypoint automatically handles dependency installation, database in
 pip install -r requirements.txt
 
 # Set up environment
-cp template.env .env
+cp env.example .env
 # Edit .env with your API keys and credentials
 
 # Initialize config files from templates
