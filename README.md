@@ -323,7 +323,7 @@ nicefolio/
 │
 ├── compose.dev.yaml                # Docker Compose — development
 ├── compose.prod.yaml               # Docker Compose — production (3 containers)
-├── template.env                    # Environment variable template
+├── env.example                    # Environment variable template
 ├── docker-entrypoint.sh            # Container entry point script
 └── requirements.txt                # Python dependencies
 ```
@@ -513,7 +513,7 @@ git clone https://github.com/bj-ad/nicefolio.git
 cd nicefolio
 
 # Create environment file from template
-cp template.env .env
+cp env.example .env
 # Edit .env with your API keys and database credentials
 
 # Start all services (database + web UI + background worker)
@@ -551,7 +551,7 @@ python main.py
 
 ### Required API Keys
 
-See `template.env` for the complete list. At minimum:
+See `env.example` for the complete list. At minimum:
 
 | Service | Purpose | Required |
 |---------|---------|----------|
