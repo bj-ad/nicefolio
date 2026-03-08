@@ -16,7 +16,7 @@ NiceFolio ingests data from brokers, crypto exchanges, and 6 blockchain networks
 
 [View full dashboard screenshot](assets/screenshots/dashboard_full_view.png) · [Single portfolio view](assets/screenshots/dashboard_single_portfolio.png) · [Wallet manager](assets/screenshots/crypto_wallet_manager+menu.png)
 
-**Email notification mock-ups** (based on actual notification code): 
+**Email notification mock-ups** (based on actual notification code):<br>
 [Transaction review reminder](https://htmlpreview.github.io/?https://github.com/bj-ad/nicefolio/blob/main/assets/screenshots/email_transaction_review.html) · [Weekly position audit](https://htmlpreview.github.io/?https://github.com/bj-ad/nicefolio/blob/main/assets/screenshots/email_position_audit.html) · [Backup integrity check](https://htmlpreview.github.io/?https://github.com/bj-ad/nicefolio/blob/main/assets/screenshots/email_backup_integrity.html)
 
 ---
