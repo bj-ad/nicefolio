@@ -1,0 +1,58 @@
+# This file is the single source of truth for all accounts.
+# The 'id' here is the primary key that will be used in the database.
+#
+# Fields:
+# - id: Primary key (required)
+# - name: Display name (required)
+# - type: Account type - 'Exchange', 'Broker', 'Hardware Wallet', 'Physical', 'Asset Management', 'Bank'
+# - status: 'active' or 'closed' (default: 'active')
+# - currency_native: Account's default currency (optional, most accounts are multi-currency)
+
+# Example accounts - customize for your setup
+# Replace these with your actual accounts
+
+- id: 1
+  name: "Physical Assets"
+  type: "Physical"
+  status: "active"
+  # Examples: Physical gold, silver, collectibles
+
+- id: 2
+  name: "My Broker Account"
+  type: "Broker"
+  status: "active"
+  # Examples: Interactive Brokers, Charles Schwab, Fidelity, etc.
+
+- id: 3
+  name: "Crypto Exchange 1"
+  type: "Exchange"
+  status: "active"
+  # Examples: Binance, Coinbase, Kraken, etc.
+
+- id: 4
+  name: "Crypto Exchange 2"
+  type: "Exchange"
+  status: "closed"
+  # Examples: Closed or historical exchange accounts
+
+- id: 5
+  name: "Hardware Wallet 1"
+  type: "Hardware Wallet"
+  status: "active"
+  # Examples: Trezor, Ledger, etc.
+
+- id: 6
+  name: "Hardware Wallet 2"
+  type: "Hardware Wallet"
+  status: "active"
+
+- id: 7
+  name: "Hardware Wallet 3"
+  type: "Hardware Wallet"
+  status: "closed"
+
+- id: 8
+  name: "Asset Management Account"
+  type: "Asset Management"
+  status: "closed"
+  # Examples: Mutual fund accounts, robo-advisors, etc.

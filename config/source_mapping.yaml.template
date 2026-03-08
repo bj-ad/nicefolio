@@ -1,0 +1,116 @@
+# Source Mapping Configuration
+# Maps data sources to accounts and portfolios for transaction ingestion
+#
+# Each source defines:
+#   - account_id: Which account this source belongs to (numeric ID)
+#   - account_name: Human-readable account name (for clarity)
+#   - default_portfolio_id: Default portfolio for transactions (numeric ID)
+#   - default_portfolio_name: Human-readable portfolio name (for clarity)
+#   - cash_portfolio_id: Portfolio for cash/stablecoin transactions (optional)
+#   - cash_portfolio_name: Human-readable cash portfolio name (for clarity)
+#   - description: What this source represents
+#   - symbol_mappings: Special rules for specific symbols (optional)
+#
+# NOTE: Account status (active/closed) is managed in accounts_config.yaml
+#       Daily jobs check account status before syncing
+
+# ============================================================
+# BROKERAGE ACCOUNTS
+# ============================================================
+
+MyBroker:
+  description: "Main brokerage account - stocks and ETFs"
+  account_id: 2
+  account_name: "My Broker Account"
+  default_portfolio_id: 3
+  default_portfolio_name: "Stocks & ETFs"
+  cash_portfolio_id: &ibkr_cash_id 8
+  cash_portfolio_name: &ibkr_cash_name "Broker Cash Pool"
+
+  # Special symbol routing (optional)
+  # Route specific symbols to different portfolios
+  symbol_mappings:
+    - description: "Commodity ETFs tracked in Commodities portfolio"
+      symbols: ["GLD", "SLV", "IAU"]
+      portfolio_id: 4
+      portfolio_name: "Commodities & Precious Metals"
+
+    - description: "Cash balances tracked in Broker Cash Pool"
+      symbols: ["USD", "EUR"]
+      portfolio_id: *ibkr_cash_id
+      portfolio_name: *ibkr_cash_name
+
+# ============================================================
+# CRYPTOCURRENCY EXCHANGES
+# ============================================================
+
+CryptoExchange1:
+  description: "Primary crypto exchange - long-term holdings"
+  account_id: 3
+  account_name: "Crypto Exchange 1"
+  default_portfolio_id: 5
+  default_portfolio_name: "Cryptocurrency"
+  cash_portfolio_id: &cryptoexchange1_cash_id 8
+  cash_portfolio_name: &cryptoexchange1_cash_name "Broker Cash Pool"
+  
+  # Special symbol routing (optional)
+  symbol_mappings:
+    - description: "Stablecoin cash balances tracked in Broker Cash Pool"
+      symbols: ["USDT", "USDC", "BUSD", "DAI"]
+      portfolio_id: *cryptoexchange1_cash_id
+      portfolio_name: *cryptoexchange1_cash_name
+
+CryptoExchange2:
+  description: "Secondary crypto exchange (closed example)"
+  account_id: 4
+  account_name: "Crypto Exchange 2"
+  default_portfolio_id: 6
+  default_portfolio_name: "Alternative Investments"
+  cash_portfolio_id: &cryptoexchange2_cash_id 8
+  cash_portfolio_name: &cryptoexchange2_cash_name "Broker Cash Pool"
+  
+  # Special symbol routing (optional)
+  symbol_mappings:
+    - description: "Stablecoin cash balances tracked in Broker Cash Pool"
+      symbols: ["USDT", "USDC", "BUSD", "DAI"]
+      portfolio_id: *cryptoexchange2_cash_id
+      portfolio_name: *cryptoexchange2_cash_name
+
+# ============================================================
+# HARDWARE WALLETS (Cold Storage)
+# ============================================================
+
+HardwareWallet1:
+  description: "Hardware wallet #1 - long-term crypto storage"
+  account_id: 5
+  account_name: "Hardware Wallet 1"
+  default_portfolio_id: 5
+  default_portfolio_name: "Cryptocurrency"
+  wallet_type: "hardware wallet"
+
+HardwareWallet2:
+  description: "Hardware wallet #2 - long-term crypto storage"
+  account_id: 6
+  account_name: "Hardware Wallet 2"
+  default_portfolio_id: 5
+  default_portfolio_name: "Cryptocurrency"
+  wallet_type: "hardware wallet"
+
+HardwareWallet3:
+  description: "Hardware wallet #3 (closed example)"
+  account_id: 7
+  account_name: "Hardware Wallet 3"
+  default_portfolio_id: 5
+  default_portfolio_name: "Cryptocurrency"
+  wallet_type: "hardware wallet"
+
+# ============================================================
+# OTHER ACCOUNTS
+# ============================================================
+
+AssetManagement:
+  description: "Asset management account (mutual funds, robo-advisor, etc.)"
+  account_id: 8
+  account_name: "Asset Management Account"
+  default_portfolio_id: 7
+  default_portfolio_name: "Retirement Accounts"

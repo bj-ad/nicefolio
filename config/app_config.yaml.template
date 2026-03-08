@@ -1,0 +1,458 @@
+# Environment Configuration
+# DEV mode shows red "DEV" header instead of "NiceFolio" branding
+environment: DEV # Options: PROD, DEV
+
+# Scheduler settings
+# Sequential job execution with configurable start time and wait intervals
+#
+# PORTFOLIO COVERAGE:
+#   Portfolio 3 (Securities):     ✅ Auto-sync from IBKR (Account 2)
+#   Portfolio 4 (Commodities):    ✅ Auto-sync Commodity ETFs from IBKR (Account 2) + Manual Physical Gold (Account 1)
+#   Portfolio 5 (Crypto):         ✅ Auto-sync from Binance.th (Acct 3) + Wallets (Acct 5-7)
+#   Portfolio 6 (Crypto Trading): ✅ Auto-sync from Binance.com (Account 4)
+#   Portfolio 1-2 (Cash):         Manual entry only
+#   Portfolio 7 (K-Bank MF):      Closed/Historical only
+#
+scheduler:
+  # SEQUENTIAL JOB EXECUTION
+  # All jobs run sequentially with sleep intervals between them.
+  # This ensures jobs don't overlap and each waits for the previous to complete.
+
+  # Start time for daily job sequence
+  # NOTE: Uses system/machine local timezone (NOT hardcoded to Bangkok ICT)
+  # For Bangkok server: 01:00 = 01:00 ICT (UTC+7)
+  # For other timezones: adjust accordingly
+  start_hour: 1
+  start_minute: 0
+
+  # Sleep time between jobs (in seconds)
+  # Recommendation: 60 seconds allows jobs to complete and database to settle
+  sleep_between_jobs: 60 # 60 seconds
+
+  # Weekly jobs day (for lot recreation, rolling window, position recreation)
+  weekly_jobs_day: sunday # Options: monday, tuesday, wednesday, thursday, friday, saturday, sunday
+
+  # Position recreation settings (weekly self-correction)
+  # Automatically applies to ALL portfolios with:
+  #   - status = active
+  #   - update_method = automatic
+  #   - has positions in database
+  # No hardcoded portfolio IDs - fully config-driven from portfolio_config.yaml
+  position_recreation_enabled: true
+
+  # Rolling window snapshots recreation settings
+  rolling_window_enabled: true
+  rolling_window_frequency: weekly # Options: daily, weekly
+
+  # GAP DETECTION AND AUTO-FIX (Checks for missing data when worker starts)
+  #    - Detects gaps in FX rates and market data
+  #    - Automatically runs backfill scripts to fill gaps (standard behavior)
+  #    - Sends notifications ONLY if automatic fix fails
+  #    - FX gaps: Always checked (not filtered by positions) - tax compliance
+  #    - Market data gaps: Only for symbols with active positions (quantity != 0)
+  #    - Respects legitimate gaps: FX on weekends, securities on holidays
+  #    - After lookback window, accepts gaps as legitimate (non-trading days)
+  backfill_on_startup: true
+  backfill_lookback_days: 7 # How many days to check for missing data
+
+  # ============================================================================
+  # JOB SEQUENCE (Sequential Execution)
+  # ============================================================================
+  # DAILY JOBS (Mon-Sun):
+  #   01:00 AM → Start
+  #
+  #   Step 1: Data Sync (~10 minutes)
+  #           - Sync IBKR transactions
+  #           - Sync Binance.th transactions
+  #           - Sync Binance.com transactions
+  #           - Sync crypto wallet transactions
+  #           - Update market prices (crypto, securities, FX, gold)
+  #
+  #   Step 2: Sleep (5 minutes) - Wait for data to settle
+  #
+  #   Step 3: Daily Snapshots (~30 seconds)
+  #           - Create snapshots for automatic portfolios (uses positions table)
+  #
+  #   Step 4: Sleep (5 minutes)
+  #
+  #   Step 5: Manual Portfolio Forward-Fill (~10 seconds)
+  #           - Forward-fill manual portfolios (1, 2) to today
+  #
+  #   DAILY SEQUENCE END (~01:21 AM)
+  #
+  # WEEKLY JOBS (Sunday only, after daily jobs):
+  #
+  #   Step 6: Sleep (5 minutes) - Prepare for intensive jobs
+  #
+  #   Step 7: Lot Recreation (~8 minutes)
+  #           - Delete all lots and allocations
+  #           - Rebuild from transactions using FIFO
+  #
+  #   Step 8: Sleep (5 minutes) - Let database settle
+  #
+  #   Step 9: Rolling Window Snapshots (~5 minutes)
+  #           - Recreate last 30 days using lot-based calculation
+  #           - Handles late transactions, price corrections
+  #
+  #   Step 10: Sleep (5 minutes)
+  #
+  #   Step 11: Position Recreation (~3 minutes)
+  #            - Rebuild positions from transactions
+  #            - Uses lot allocations for accurate cost basis
+  #            - Self-correction for dividend reinvestments
+  #            - Applies to ALL automatic portfolios (status=active, update_method=automatic)
+  #
+  #   WEEKLY SEQUENCE END (~01:52 AM on Sunday)
+  # ============================================================================
+  #
+  # NOTES:
+  # - Jobs run sequentially: each waits for previous to complete
+  # - Sleep intervals allow database to settle and prevent conflicts
+  # - Weekly jobs only run on configured day (default: Sunday)
+  # - On startup: Check for missing data (last 7 days)
+  # - Position updates happen via update_position_from_transaction() after each transaction
+  # - Weekly position recreation provides self-correction
+  #
+  # OBSOLETE (Removed):
+  # - Position reconciliation (daily) - obsolete, positions updated by transactions + weekly recreation
+  # - Individual job times - now using sequential execution with sleep intervals
+  # ============================================================================
+
+# Global base currency
+# This is the default base currency used across all portfolios for reporting and calculations
+# Individual accounts can still maintain their own native currencies (see accounts_config.yaml)
+base_currency: EUR
+
+# Market data and symbols
+# Commodity ETFs
+commodity_etf_tickers:
+  - GLD # SPDR Gold Trust
+  - 4GLD # WisdomTree Physical Gold (Euro-hedged)
+  - IAU # iShares Gold Trust
+  - GLDM # SPDR Gold MiniShares Trust
+  - SLV # iShares Silver Trust
+
+ibkr_cash_symbols:
+  - EUR.USD
+
+ibkr_etf_symbols:
+  - VGK
+  - VOO
+  - VWCG
+  - VUAA
+  - SMH
+  - XNAS
+  - VHVE
+
+hodl_symbols:
+  - BTC
+  - ETH
+  - BNB
+  - SOL
+  - ADA
+  - XRP
+
+# Stablecoins (German Tax Compliance)
+# These are crypto assets tracked for tax purposes, NOT fiat currency
+# Portfolio Allocation: Portfolio 8 (Broker Cash Pool)
+# Tax Treatment: Each stablecoin transaction is a taxable event
+# Trading Impact: BTC/USDT creates TWO transactions (exchange):
+#   1. Dispose USDT (taxable) → Portfolio 8
+#   2. Acquire/Dispose BTC → Portfolio 6
+stablecoin_symbols:
+  - USDT # Tether
+  - USDC # USD Coin
+  - BUSD # Binance USD
+  - DAI # Dai Stablecoin
+  - TUSD # TrueUSD
+  - USDP # Pax Dollar
+
+trading_symbols:
+  - LTC
+  - ADA
+  - SOL
+  - LINK
+  - XRP
+  - HBAR
+  - BNB
+
+trading_base_currency: BTC # Freqtrade bot trades against BTC
+
+# Benchmarks for portfolio comparison (Performance Charts & Risk/Reward Analysis)
+# These are stored in the same market_data table as regular holdings to avoid duplication
+#
+# IMPORTANT: Symbol mappings (yfinance_symbol, currency, exchange) are defined in:
+#   - config/symbol_mapping.yaml (for securities like VHVE)
+#   - Auto-detected for crypto (BTC uses existing crypto sync infrastructure)
+#
+# This keeps symbol definitions centralized and prevents duplication.
+benchmarks:
+  benchmark_securities:
+    symbol: VHVE # Symbol must exist in symbol_mapping.yaml or be auto-detected
+    label: VHVE # Display label in charts
+  benchmark_crypto:
+    symbol: BTC # Uses existing crypto price sync (CoinMarketCap → yfinance fallback)
+    label: BTC # Display label in charts
+  benchmark_commodities:
+    symbol: 4GLD
+    label: GLD
+  risk_free_rate: 4.0 # Annual risk-free rate (%) for Sharpe ratio calculations
+
+  # Target Composite Benchmark - Rebalanced Portfolio
+  # Simulates a hypothetical portfolio with monthly rebalancing to target weights
+  target_allocations:
+    securities: 0.70 # 70% VHVE (or symbol from benchmark_securities)
+    crypto: 0.20 # 20% BTC (or symbol from benchmark_crypto)
+    commodities: 0.10 # 10% 4GLD (or symbol from benchmark_commodities)
+  rebalancing_period: monthly # Options: monthly, quarterly, yearly
+
+# FX pairs for German tax compliance (§ 20 EStG)
+# Official ECB rates published daily at 16:00 CET on working days
+# Source: European Central Bank (ECB) - legally binding reference rates
+fx_pairs:
+  - EUR/USD # ECB official rate: 1 EUR = X USD
+  - EUR/THB # ECB official rate: 1 EUR = X THB
+# Note: USD/THB removed - can be calculated as cross-rate if needed: (EUR/USD)^-1 × (EUR/THB)
+# Legacy yfinance symbols kept for backward compatibility but no longer used
+yf_fx_symbols:
+  - EURUSD=X
+  - EURTHB=X
+
+# Price sync exclusions
+# Asset classes and symbols that should NOT be synced from external APIs
+price_sync:
+  # Exclude these asset classes from securities price sync
+  exclude_asset_classes:
+    - crypto # Synced separately via crypto price sync (CoinMarketCap)
+    - gold_baht # Synced separately via Gold Traders scraper
+    - cash # Cash currencies (THB, USD, EUR) handled by FX sync
+    - mutual_fund # Internal-only symbols like KBANK-MF
+    - strategic_balancing_reserve # Synthetic HODL-SBR token
+
+  # Exclude specific symbols from price sync
+  # These are currencies or operational symbols that should not be priced as securities
+  exclude_symbols:
+    - THB # Thai Baht (currency, not security)
+    - USD # US Dollar (currency, not security)
+    - EUR # Euro (currency, not security)
+    - KBANK-MF # KBank mutual fund (internal-only, no market price)
+    - HODL-SBR # Synthetic token for early HODL portfolio recreation
+
+# Cache settings
+cache:
+  maxsize: 1024
+  ttl_seconds: 600
+
+# Portfolio management settings
+portfolio:
+  # Lot allocation method for cost basis calculation
+  lot_method: FIFO # Only FIFO supported
+
+  # How many days of snapshot history to keep (0 = keep all)
+  snapshot_retention_days: 0
+
+  # Position reconciliation tolerance (for detecting discrepancies)
+  position_tolerance: 0.00000001
+
+  # Lot tracking exclusions
+  # Asset classes that should NOT have lot tracking (e.g., cash currencies)
+  # These assets will skip lot creation and FIFO allocation
+  lot_tracking_exclude_asset_classes:
+    - cash # Cash currencies (THB, USD, EUR) don't need cost basis tracking
+    # - mutual_fund # Mutual funds handled differently (if applicable)
+
+# Binance.th configuration
+binanceth:
+  # THB withdrawal fee (charged by Binance.th)
+  thb_withdrawal_fee: 20.00
+  # Trading fee percentage (for auto-convert / easy buy-sell)
+  trading_fee_percent: 0.25
+  # Fee handling: 'implicit' (included in price) or 'explicit' (separate fee field)
+  fee_handling: implicit
+  # Transaction sync lookback period (days)
+  # How far back to fetch deposits/withdrawals during daily sync
+  # Recommended: 7-14 days (shorter = faster, less API load)
+  sync_lookback_days: 7
+
+# Binance.com configuration
+binancecom:
+  # Transaction sync lookback period (days)
+  # How far back to fetch trades/deposits/withdrawals during daily sync
+  # Recommended: 7-14 days (shorter = faster, less API load)
+  sync_lookback_days: 7
+
+# Crypto Wallet configuration
+crypto_wallets:
+  # Transaction sync lookback period (days)
+  # How far back to fetch blockchain transactions during daily sync
+  # Shorter lookback recommended to avoid double-counting staking rewards
+  # that may already be included in migration balances
+  # Recommended: 7 days (default)
+  sync_lookback_days: 7
+
+# Blockchain configuration
+# Settings for blockchain providers (BTC, ETH, SOL, etc.)
+blockchain:
+  btc:
+    # BIP44 address gap limit for HD wallet (xpub/ypub/zpub) discovery
+    # How many consecutive unused addresses to check before stopping
+    # Higher values = more thorough but slower (default: 20)
+    # Recommended: 10-50 depending on wallet usage patterns
+    gap_limit: 10
+
+    # Maximum addresses to check per xpub (safety limit)
+    max_addresses: 1000
+
+  bsc:
+    # Known BSC validator operator addresses for native BNB staking
+    # These are the validators YOU delegate to. The provider queries each validator's
+    # credit contract to find your staked BNB balance.
+    # Format: operator_address: display_name
+    validator_addresses:
+      # "0x...": "Validator Name"
+
+    # Known credit contracts for validators (performance cache / jailed validator fallback)
+    # When StakeHub on-chain query fails (e.g., jailed/migrated validators), this mapping
+    # is used to look up the credit contract directly.
+    # Format: operator_address: credit_contract_address
+    validator_credit_contracts:
+      # "0x...": "0x..."
+
+  # Future blockchain configurations can be added here:
+  # eth:
+  #   # Ethereum-specific settings
+  # sol:
+  #   # Solana-specific settings
+
+# ============================================================================
+# NOTIFICATIONS
+# ============================================================================
+#
+# Configure notifications for job failures and critical alerts.
+# Supported channels: email, home_assistant, telegram, webhook
+#
+# SECURITY:
+#   - Store sensitive credentials in environment variables (recommended)
+#   - Or in this file (less secure, but acceptable for local setups)
+#
+# ENVIRONMENT VARIABLES (recommended):
+#   - SMTP_PASSWORD              # Email password
+#   - HOME_ASSISTANT_TOKEN       # Home Assistant long-lived access token
+#   - TELEGRAM_BOT_TOKEN         # Telegram bot token
+#
+notifications:
+  enabled: true # Set to true to enable notifications
+
+  # Send notifications for successful jobs (default: false)
+  # Usually only failures need alerts, but you can enable success summaries
+  send_success_notifications: false
+
+  # Send daily summary when new transactions are ingested (default: true)
+  # Provides account-by-account breakdown and reminds you to review transactions
+  send_transaction_notifications: true
+
+  channels:
+    # ========================================================================
+    # EMAIL (SMTP)
+    # ========================================================================
+    email:
+      enabled: false # Set to true to enable email notifications
+      smtp_server: smtp.gmail.com # Gmail example
+      smtp_port: 587
+      smtp_user: your-email@gmail.com
+      smtp_password: "" # Or use SMTP_PASSWORD environment variable
+      from_email: your-email@gmail.com
+      to_emails:
+        - recipient1@example.com
+        - recipient2@example.com
+
+      # Gmail setup:
+      #   1. Enable 2FA on your Google account
+      #   2. Generate App Password: https://myaccount.google.com/apppasswords
+      #   3. Use App Password as smtp_password
+
+      # Other providers:
+      #   - Outlook: smtp.office365.com:587
+      #   - Yahoo: smtp.mail.yahoo.com:587
+      #   - Custom SMTP: your-smtp-server.com:587
+
+    # ========================================================================
+    # HOME ASSISTANT
+    # ========================================================================
+    home_assistant:
+      enabled: false
+      url: http://homeassistant.local:8123 # Your Home Assistant URL
+      token: "" # Or use HOME_ASSISTANT_TOKEN environment variable
+      service: notify.notify # Default notification service
+
+      # Examples:
+      #   - notify.notify              # Default (all devices)
+      #   - notify.mobile_app_phone    # Specific mobile app
+      #   - notify.telegram            # If you have Telegram integration
+      #   - persistent_notification.create  # Creates persistent notification in UI
+
+      # Setup:
+      #   1. Go to Home Assistant → Profile → Long-Lived Access Tokens
+      #   2. Create new token
+      #   3. Copy token and set in HOME_ASSISTANT_TOKEN env var or above
+
+      # Test from command line:
+      #   curl -X POST http://homeassistant.local:8123/api/services/notify/notify \
+      #     -H "Authorization: Bearer YOUR_TOKEN" \
+      #     -H "Content-Type: application/json" \
+      #     -d '{"message": "Test from Portfolio Tracker"}'
+
+    # ========================================================================
+    # TELEGRAM
+    # ========================================================================
+    telegram:
+      enabled: false
+      bot_token: "" # Or use TELEGRAM_BOT_TOKEN environment variable
+      chat_id: "" # Your chat ID or group chat ID
+
+      # Setup:
+      #   1. Create bot: Talk to @BotFather on Telegram
+      #   2. Get bot token from BotFather
+      #   3. Get your chat_id:
+      #      - Send message to your bot
+      #      - Visit: https://api.telegram.org/bot<BOT_TOKEN>/getUpdates
+      #      - Look for "chat":{"id": YOUR_CHAT_ID}
+      #   4. Set TELEGRAM_BOT_TOKEN and chat_id
+
+      # For group chats:
+      #   - Add bot to group
+      #   - Get group chat_id (negative number like -123456789)
+
+    # ========================================================================
+    # CUSTOM WEBHOOK
+    # ========================================================================
+    webhook:
+      enabled: false
+      url: https://your-webhook-url.com/portfolio-tracker
+      method: POST # POST or GET
+      headers:
+        Content-Type: application/json
+        # Authorization: Bearer YOUR_TOKEN
+
+      # Examples:
+      #   - Discord webhook
+      #   - Slack incoming webhook
+      #   - Custom monitoring system
+      #   - IFTTT webhook
+
+      # Payload format (POST):
+      #   {
+      #     "timestamp": "2025-12-07T10:30:00",
+      #     "severity": "🚨 CRITICAL",
+      #     "job_name": "Data Sync",
+      #     "job_type": "daily",
+      #     "error_message": "Connection timeout",
+      #     "source": "portfolio_tracker"
+      #   }
+# in code:
+# from utils.app_config import load_app_config
+# config = load_app_config()
+# hour = config["scheduler"]["target_hour_jobs"]
+# gold_etf = config["gold_etf_ticker"]
+# fx_pairs = config["fx_pairs"]
+# cache_ttl = config["cache"]["ttl_seconds"]

@@ -1,0 +1,125 @@
+# Symbol Normalization Configuration
+# Maps various symbol formats to canonical symbols
+# Format: "canonical_symbol": ["variant1", "variant2", ...]
+
+# ============================================================
+# STOCKS WITH SPECIAL CHARACTERS
+# ============================================================
+
+# Berkshire Hathaway
+BRK-B: ["BRK.B", "BRK B", "BRK/B"]
+BRK-A: ["BRK.A", "BRK A", "BRK/A"]
+
+# Brown-Forman
+BF-A: ["BF.A", "BF A", "BF/A"]
+BF-B: ["BF.B", "BF B", "BF/B"]
+
+# ============================================================
+# INTERNATIONAL STOCKS (Exchange suffixes)
+# ============================================================
+
+# London Stock Exchange (.L)
+VOD.L: ["VOD", "VOD LN", "VOD:LSE"]
+BP.L: ["BP", "BP LN", "BP:LSE"]
+HSBA.L: ["HSBA", "HSBA LN", "HSBC LN"]
+
+# Swiss Exchange (.SW)
+NESN.SW: ["NESN", "NESN SW", "NESN:SWX"]
+NOVN.SW: ["NOVN", "NOVN SW", "NOVN:SWX"]
+
+# Toronto Stock Exchange (.TO)
+TD.TO: ["TD", "TD TO", "TD:TSE"]
+RY.TO: ["RY", "RY TO", "RY:TSE"]
+
+# ============================================================
+# CURRENCY PAIRS (FX)
+# ============================================================
+
+# Major pairs
+EURUSD: ["EUR/USD", "EUR-USD", "EURUSD=X", "EUR.USD"]
+USDJPY: ["USD/JPY", "USD-JPY", "JPY=X", "USD.JPY"]
+GBPUSD: ["GBP/USD", "GBP-USD", "GBPUSD=X", "GBP.USD"]
+USDCHF: ["USD/CHF", "USD-CHF", "CHF=X", "USD.CHF"]
+
+# Asian currencies
+USDTHB: ["USD/THB", "USD-THB", "THB=X", "USD.THB"]
+USDHKD: ["USD/HKD", "USD-HKD", "HKD=X", "USD.HKD"]
+USDSGD: ["USD/SGD", "USD-SGD", "SGD=X", "USD.SGD"]
+
+# Cross pairs
+EURTHB: ["EUR/THB", "EUR-THB", "EURTHB=X", "EUR.THB"]
+EURGBP: ["EUR/GBP", "EUR-GBP", "EURGBP=X", "EUR.GBP"]
+EURJPY: ["EUR/JPY", "EUR-JPY", "EURJPY=X", "EUR.JPY"]
+
+# ============================================================
+# CRYPTOCURRENCIES
+# ============================================================
+
+# Major cryptos
+BTC: ["BTCUSD", "BTC-USD", "BTC/USD", "XBTUSD", "XBT", "BTC.USD"]
+ETH: ["ETHUSD", "ETH-USD", "ETH/USD", "ETH.USD"]
+BNB: ["BNBUSD", "BNB-USD", "BNB/USD", "BNB.USD"]
+SOL: ["SOLUSD", "SOL-USD", "SOL/USD", "SOL.USD"]
+ADA: ["ADAUSD", "ADA-USD", "ADA/USD", "ADA.USD"]
+XRP: ["XRPUSD", "XRP-USD", "XRP/USD", "XRP.USD"]
+
+# Other popular cryptos
+DOT: ["DOTUSD", "DOT-USD", "DOT/USD"]
+LINK: ["LINKUSD", "LINK-USD", "LINK/USD"]
+MATIC: ["MATICUSD", "MATIC-USD", "MATIC/USD"]
+AVAX: ["AVAXUSD", "AVAX-USD", "AVAX/USD"]
+ATOM: ["ATOMUSD", "ATOM-USD", "ATOM/USD"]
+LTC: ["LTCUSD", "LTC-USD", "LTC/USD"]
+BCH: ["BCHUSD", "BCH-USD", "BCH/USD"]
+HBAR: ["HBARUSD", "HBAR-USD", "HBAR/USD"]
+
+# ============================================================
+# COMMODITIES & ETFs
+# ============================================================
+
+# Gold ETFs
+GLD: ["GLD.US", "GLD US", "GLD:NYSE"]
+4GLD: ["4GLDd", "4GLDD", "4GLD.XETRA", "4GLD.DE", "4GLD DE", "4GLD:XETRA"]
+IAU: ["IAU.US", "IAU US", "IAU:NYSE"]
+GLDM: ["GLDM.US", "GLDM US", "GLDM:NYSE"]
+
+# European ETFs (XETRA)
+VWCG: ["VWCG.XETRA", "VWCG.DE", "VWCG DE", "VWCG:XETRA", "VWCG:FWB"]
+SMH: ["SMH.MI", "SMH.DE", "SMH.XETRA"]
+VHVE: ["VHVE.MI", "VHVE.DE", "VHVE.XETRA"]
+XNAS: ["XNAS.DE", "XNAS.XETRA", "XNAS DE"]
+
+VUAA:
+  [
+    "VUAA.XETRA",
+    "VUAA.MI",
+    "VUAA.DE",
+    "VUAA DE",
+    "VUAA:XETRA",
+    "VUAA:FWB",
+    "VUAA.AS",
+    "VUAA:AMS",
+  ]
+VUSA: ["VUSA.L", "VUSA LN", "VUSA:LSE"]
+
+# Silver ETFs
+SLV: ["SLV.US", "SLV US", "SLV:NYSE"]
+
+# Popular ETFs
+VOO: ["VOO.US", "VOO US", "VOO:NYSE"]
+SPY: ["SPY.US", "SPY US", "SPY:NYSE"]
+QQQ: ["QQQ.US", "QQQ US", "QQQ:NASDAQ"]
+VTI: ["VTI.US", "VTI US", "VTI:NYSE"]
+VGK: ["VGK.US", "VGK US", "VGK:NYSE"]
+
+# ============================================================
+# COMMON TECH STOCKS
+# ============================================================
+
+AAPL: ["AAPL.US", "AAPL US", "AAPL:NASDAQ"]
+MSFT: ["MSFT.US", "MSFT US", "MSFT:NASDAQ"]
+GOOGL: ["GOOGL.US", "GOOGL US", "GOOGL:NASDAQ"]
+AMZN: ["AMZN.US", "AMZN US", "AMZN:NASDAQ"]
+NVDA: ["NVDA.US", "NVDA US", "NVDA:NASDAQ"]
+META: ["META.US", "META US", "META:NASDAQ", "FB", "FB.US"]
+TSLA: ["TSLA.US", "TSLA US", "TSLA:NASDAQ"]

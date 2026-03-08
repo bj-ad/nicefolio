@@ -1,0 +1,35 @@
+# Development Docker Compose Configuration for Local Machine
+#
+# This connects to the PRODUCTION database running in NiceFolio
+# NO scheduler - only GUI for development/testing
+
+services:
+  # Development GUI (connects to production database)
+  nicefolio_dev_gui:
+    image: python:3.13-slim
+    container_name: nicefolio_dev_gui
+    env_file:
+      - .env.dev # All environment variables loaded from .env.dev file
+    working_dir: /app
+    volumes:
+      # Mount current directory for live code changes
+      - .:/app
+      - ./logs:/app/logs
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${PORT_NICEGUI:-8889}:8080" # Note: NiceGUI runs on 8080 internally
+    extra_hosts:
+      # Allow container to connect to host's PostgreSQL
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    command: >
+      bash -c "
+        apt-get update &&
+        apt-get install -y --no-install-recommends gcc g++ cmake build-essential pkg-config libsecp256k1-dev &&
+        pip install -r requirements.txt &&
+        python main.py
+      "
+
+# NOTE: No postgres service here - dev connects to production database
+# NOTE: No scheduler service - only production runs automatic jobs

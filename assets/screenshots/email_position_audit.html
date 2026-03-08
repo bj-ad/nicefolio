@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Email Mock-up – Position Audit Notification</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f0f2f5; font-family: Arial, sans-serif; padding: 24px; }
+
+  .browser-bar {
+    background: #3c4043; border-radius: 8px 8px 0 0;
+    padding: 10px 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red   { background: #ff5f57; }
+  .dot.yellow{ background: #febc2e; }
+  .dot.green { background: #28c840; }
+  .url-bar {
+    flex: 1; background: #202124; color: #bdc1c6; font-size: 12px;
+    padding: 4px 12px; border-radius: 4px; font-family: monospace;
+  }
+  .gmail-shell {
+    background: #fff; border-radius: 0 0 8px 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.18); max-width: 980px; margin: 0 auto;
+  }
+  .gmail-header {
+    background: #fff; padding: 12px 24px; border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .gmail-logo { color: #ea4335; font-size: 22px; font-weight: 700; letter-spacing: -1px; }
+  .gmail-logo span { color: #4285f4; }
+  .gmail-search {
+    flex: 1; background: #f1f3f4; border: none; border-radius: 24px;
+    padding: 8px 20px; font-size: 14px; color: #5f6368;
+  }
+  .gmail-layout { display: flex; min-height: 600px; }
+  .sidebar {
+    width: 220px; background: #fff; padding: 16px 8px;
+    border-right: 1px solid #e0e0e0; font-size: 13px; flex-shrink: 0;
+  }
+  .compose-btn {
+    background: #c2e7ff; border: none; border-radius: 16px;
+    padding: 16px 24px; font-size: 14px; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px; width: calc(100% - 8px);
+  }
+  .nav-item {
+    padding: 4px 12px 4px 16px; border-radius: 0 20px 20px 0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .nav-item.active { background: #d3e3fd; font-weight: 600; }
+  .nav-badge { background: #c5221f; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 10px; }
+  .message-pane { flex: 1; padding: 24px 32px; overflow-y: auto; }
+  .msg-subject {
+    font-size: 20px; font-weight: 400; color: #202124; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .label-badge {
+    font-size: 11px; border-radius: 4px; padding: 2px 8px; font-weight: 600;
+  }
+  .label-audit   { background: #fce8e6; color: #c5221f; }
+  .label-weekly  { background: #fef7e0; color: #e37400; }
+  .msg-meta {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e0e0e0;
+  }
+  .sender-row { display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%; background: #e37400;
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 600; flex-shrink: 0;
+  }
+  .sender-info { font-size: 13px; }
+  .sender-name { font-weight: 600; color: #202124; }
+  .sender-addr  { color: #5f6368; }
+  .msg-date { font-size: 12px; color: #5f6368; }
+
+  /* Telegram pill row */
+  .channel-row {
+    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .channel-pill {
+    font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .pill-email    { background: #e8eaed; color: #5f6368; }
+  .pill-telegram { background: #e3f2fd; color: #0277bd; }
+  .pill-ha       { background: #e8f5e9; color: #2e7d32; }
+
+  .email-body {
+    font-family: 'Courier New', Courier, monospace; font-size: 12.5px;
+    line-height: 1.65; color: #202124; white-space: pre-wrap;
+    background: #fafafa; border: 1px solid #e0e0e0; border-radius: 4px;
+    padding: 20px 24px;
+  }
+  /* colour helpers applied via <span> tags inside <pre> */
+  .c-ok       { color: #137333; }
+  .c-warn     { color: #e37400; }
+  .c-err      { color: #c5221f; }
+  .c-info     { color: #1a73e8; }
+  .c-dim      { color: #80868b; }
+  .c-heading  { color: #202124; font-weight: bold; }
+  .c-minor    { color: #9c6a00; }
+</style>
+</head>
+<body>
+
+<div style="max-width:980px; margin:0 auto;">
+  <div class="browser-bar">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+    <div class="url-bar">mail.google.com/mail/u/0/#inbox</div>
+  </div>
+
+  <div class="gmail-shell">
+    <div class="gmail-header">
+      <div class="gmail-logo">G<span>m</span>ail</div>
+      <input class="gmail-search" type="text" value="NiceFolio audit" readonly>
+    </div>
+
+    <div class="gmail-layout">
+      <div class="sidebar">
+        <button class="compose-btn">✏️ Compose</button>
+        <div class="nav-item active">Inbox <span class="nav-badge">1</span></div>
+        <div class="nav-item" style="margin-top:4px;">Starred</div>
+        <div class="nav-item">Sent</div>
+        <div class="nav-item">Drafts</div>
+        <div class="nav-item">All Mail</div>
+        <hr style="margin:12px 0;border:none;border-top:1px solid #e0e0e0;">
+        <div class="nav-item">NiceFolio</div>
+      </div>
+
+      <div class="message-pane">
+        <div class="msg-subject">
+          ⚠️ NiceFolio: Position Audit Found 1 Discrepancy
+          <span class="label-badge label-audit">Audit</span>
+          <span class="label-badge label-weekly">Weekly</span>
+        </div>
+
+        <!-- Delivery channels -->
+        <div class="channel-row">
+          <span style="font-size:12px;color:#5f6368;align-self:center;">Also sent via:</span>
+          <span class="channel-pill pill-telegram">✈ Telegram</span>
+          <span class="channel-pill pill-ha">🏠 Home Assistant</span>
+          <span class="channel-pill pill-email">✉ Email (this)</span>
+        </div>
+
+        <div class="msg-meta">
+          <div class="sender-row">
+            <div class="avatar">N</div>
+            <div class="sender-info">
+              <div class="sender-name">NiceFolio Notifications</div>
+              <div class="sender-addr">nicefolio@homeserver.local → me</div>
+            </div>
+          </div>
+          <div class="msg-date">Sun, 8 Mar 2026, 07:42</div>
+        </div>
+
+        <div class="email-body">
+<span class="c-warn">======================================================================
+⚠️  TAX COMPLIANCE WARNING - POSITION DISCREPANCIES FOUND
+======================================================================</span>
+
+Audit Timestamp: 2026-03-08T07:41:53.402188+00:00
+
+<span class="c-heading">SUMMARY:</span>
+  Portfolios Audited:    3
+  Total Discrepancies:   1
+  Issues:                Crypto Wallets – SOL quantity mismatch
+
+<span class="c-heading">======================================================================
+IBKR SECURITIES &amp; COMMODITIES
+======================================================================</span>
+  Source:       IBKR Flex Report (OpenPositions)
+  Report Date:  2026-03-07
+  IBKR Account: U1234567
+  Status:       <span class="c-ok">✅ SUCCESS</span>
+
+  Positions Checked: 16
+  Matches:           15
+  Discrepancies:      0
+  <span class="c-minor">Minor Differences (&lt;EUR 0.01):  1</span>
+
+  POSITION DETAILS (Database vs IBKR):
+  <span class="c-dim">-----------------------------------------------------------------</span>
+  <span class="c-ok">✅ AAPL:   50.000000</span>
+  <span class="c-ok">✅ MSFT:   30.000000</span>
+  <span class="c-ok">✅ NVDA:   15.000000</span>
+  <span class="c-ok">✅ AMZN:   10.000000</span>
+  <span class="c-ok">✅ META:   25.000000</span>
+  <span class="c-ok">✅ TSLA:    8.000000</span>
+  <span class="c-ok">✅ SPY:   100.000000</span>
+  <span class="c-ok">✅ QQQ:    50.000000</span>
+  <span class="c-ok">✅ VWCE:   75.000000</span>
+  <span class="c-ok">✅ XDWD:   40.000000</span>
+  <span class="c-ok">✅ IEMB:   20.000000</span>
+  <span class="c-ok">✅ EWJ:    35.000000</span>
+  <span class="c-ok">✅ BNDX:   60.000000</span>
+  <span class="c-ok">✅ GLD:    12.000000</span>
+  <span class="c-ok">✅ SLV:    80.000000</span>
+  <span class="c-minor">ℹ️  ACWI:  DB=45.000000, IBKR=44.999900, Diff=0.000100  (EUR 0.0082)</span>
+
+<span class="c-heading">======================================================================
+CASH POOL
+======================================================================</span>
+  Source:       IBKR Flex Report (FxPositions)
+  Report Date:  2026-03-07
+  Status:       <span class="c-ok">✅ SUCCESS</span>
+
+  Currencies Checked: 3
+  Matches:            3
+  Discrepancies:      0
+  Note: Lot-based audit for foreign currencies; EUR from Position table (base currency has no lots)
+
+  CASH DETAILS (Database vs IBKR):
+  <span class="c-dim">-----------------------------------------------------------------</span>
+  <span class="c-ok">✅ EUR:  12,450.12 (base currency – from Position table)</span>
+  <span class="c-ok">✅ USD:   3,840.00</span>
+  <span class="c-ok">✅ THB:  95,200.00</span>
+
+<span class="c-heading">======================================================================
+CRYPTO WALLETS (ACCOUNT-BASED AUDIT)
+======================================================================</span>
+  Source:           Blockchain APIs
+  Accounts Audited: 4
+  Wallets Checked:  9
+  Status:           <span class="c-warn">⚠️ WARNING – 1 DISCREPANCY</span>
+
+  INDIVIDUAL WALLET BALANCES (From Blockchain):
+  <span class="c-dim">-----------------------------------------------------------------</span>
+
+  Cold Storage – Bitcoin:
+    <span class="c-ok">BTC:  0.86420000  (Liquid: 0.86420000, Staked: 0.00000000)</span>
+        Source: Blockstream API (xpub – 12 derived addresses)
+
+  DeFi Hot Wallet – Ethereum:
+    <span class="c-ok">ETH:  3.14159265  (Liquid: 3.14159265, Staked: 0.00000000)</span>
+        Source: Etherscan API
+    <span class="c-ok">USDC: 1,250.000000 (Liquid: 1,250.000000, Staked: 0.00000000)</span>
+        Source: Etherscan API
+
+  BSC Staking Wallet – BNB:
+    <span class="c-ok">BNB:  48.72310000  (Liquid: 18.72310000, Staked: 30.00000000)</span>
+        Source: BSCScan API + BSC Staking Contract
+        Unstaking: 0.00000000
+
+  Solana Staking Wallet:
+    <span class="c-warn">⚠️ SOL: FETCH PARTIAL – liquid balance retrieved, staking RPC timeout</span>
+    SOL:  102.50000000 (Liquid: 102.50000000, Staked: 0.00000000)
+        Source: Alchemy RPC (staked amount unavailable – using 0)
+
+  Cardano (ADA):
+    <span class="c-ok">ADA:  8,430.000000  (Liquid: 430.000000, Staked: 8,000.000000)</span>
+        Source: Blockfrost API
+
+  XRP Ledger:
+    <span class="c-ok">XRP:  2,100.000000  (Liquid: 2,100.000000, Staked: 0.00000000)</span>
+        Source: XRPL public nodes
+
+  <span class="c-dim">-----------------------------------------------------------------
+  AGGREGATE COMPARISON (Total Database vs Total Blockchain):
+  -----------------------------------------------------------------</span>
+  Symbols Checked: 8
+  Matches:         7
+  <span class="c-warn">Discrepancies:   1</span>
+  Minor Differences (&lt;EUR 0.01): 0
+
+  Matching Symbols:
+    <span class="c-ok">✅ BTC:   0.86420000</span>
+    <span class="c-ok">✅ ETH:   3.14159265</span>
+    <span class="c-ok">✅ BNB:  48.72310000</span>
+    <span class="c-ok">✅ USDC: 1,250.00000000</span>
+    <span class="c-ok">✅ ADA:  8,430.00000000</span>
+    <span class="c-ok">✅ XRP:  2,100.00000000</span>
+    ... and 1 more
+
+  <span class="c-warn">⚠️  DISCREPANCIES (Exceeding EUR 0.01 threshold):
+    ⚠️  SOL:
+        Database:   147.31800000
+        Blockchain: 102.50000000
+        Difference:  44.81800000  (EUR 6,433.23)
+        Likely cause: Staked SOL not returned by RPC during this run</span>
+
+<span class="c-heading">======================================================================
+END OF AUDIT REPORT
+======================================================================</span>
+
+<span class="c-warn">Next Steps:
+- SOL staking balance could not be fetched (RPC timeout during this run).
+  Expected: staked ≈ 44.82 SOL across 2 stake accounts.
+- Re-run audit tomorrow to confirm resolution:
+    docker exec nicefolio_worker python -c \
+      "from service.audit_service import run_full_position_audit; \
+       run_full_position_audit()"
+- If discrepancy persists, inspect stake accounts on Solscan.</span>
+</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p style="max-width:980px;margin:12px auto 0;font-size:12px;color:#5f6368;font-family:Arial,sans-serif;">
+  <strong>Mock-up:</strong> Weekly position audit email produced by <code>format_detailed_audit_report()</code> and sent via <code>send_audit_notification()</code>
+  in <code>service/audit_service.py</code>. Delivered to email + Telegram + Home Assistant.
+  Subject variants: <em>"✅ … Passed"</em> / <em>"⚠️ … Found N Discrepancies"</em> / <em>"🚨 … Failed"</em>.
+</p>
+
+</body>
+</html>

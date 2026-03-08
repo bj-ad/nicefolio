@@ -1,0 +1,95 @@
+# Portfolio Configuration
+# Single source of truth for portfolio definitions
+# This file is a list of portfolios that will be synced to the database.
+# The 'id' here is the primary key that will be used in the database.
+#
+# NOTE: base_currency is now defined globally in app_config.yaml
+#       All portfolios use the same base currency for consistency
+#
+# Field Definitions:
+# ------------------
+# update_method:
+#   - "automatic": Transactions are auto-synced from external APIs (IBKR, Binance.com, Binance.th, crypto wallets)
+#                  Portfolio is included in automatic position reconciliation AND daily snapshots
+#                  Used for: Securities, crypto (exchange & wallets), auto-synced broker cash
+#
+#   - "manual":    Transactions are entered manually (e.g., monthly cash updates, physical gold)
+#                  Portfolio is EXCLUDED from both position reconciliation AND daily snapshots
+#                  Used for: Cash holdings updated monthly, infrequently-traded assets
+#                  Rationale: Avoid snapshot noise from stale data; snapshots created manually when updated
+#
+# status:
+#   - "active":  Portfolio is currently operational
+#                Behavior depends on update_method (see above)
+#
+#   - "closed":  Portfolio is inactive/historical (no new transactions)
+#                Excluded from both position reconciliation AND daily snapshots
+#                Used for: Deprecated portfolios, closed accounts
+#
+# Implementation:
+# ---------------
+# See service/portfolio_service.py:
+# - reconcile_all_positions(): Excludes status='closed' OR update_method='manual'
+# - create_all_snapshots():    Excludes status='closed' OR update_method='manual'
+#
+# Both automatic operations (reconciliation + snapshots) respect these flags to avoid
+# processing portfolios that don't have fresh data or are no longer active.
+
+# Example portfolios - customize for your setup
+# Replace these with your actual portfolios
+
+- id: 1
+  name: "Liquid Cash"
+  type: "cash"
+  description: "Manual cash holdings from bank accounts and physical cash. Updated monthly."
+  status: "active"
+  update_method: "manual"
+
+- id: 2
+  name: "Fixed Deposits"
+  type: "cash"
+  description: "Fixed deposit accounts, CDs, and other cash-equivalent instruments."
+  status: "active"
+  update_method: "manual"
+
+- id: 3
+  name: "Stocks & ETFs"
+  type: "securities"
+  description: "Publicly traded stocks and ETFs."
+  status: "active"
+  update_method: "automatic"
+
+- id: 4
+  name: "Commodities & Precious Metals"
+  type: "commodities"
+  description: "Commodity holdings including gold, silver (physical and ETF-based)."
+  status: "active"
+  update_method: "automatic"
+
+- id: 5
+  name: "Cryptocurrency"
+  type: "crypto"
+  description: "Long-term cryptocurrency holdings across exchanges and wallets."
+  status: "active"
+  update_method: "automatic"
+
+- id: 6
+  name: "Alternative Investments"
+  type: "other"
+  description: "Alternative assets, collectibles, or other investment vehicles."
+  status: "active"
+  update_method: "manual"
+
+- id: 7
+  name: "Retirement Accounts"
+  type: "securities"
+  description: "Retirement accounts (401k, IRA, pension funds)."
+  status: "active"
+  update_method: "manual"
+
+- id: 8
+  name: "Broker Cash Pool"
+  type: "cash"
+  description: "Auto-synced cash balances from brokerage accounts. Updated daily."
+  status: "active"
+  update_method: "automatic"

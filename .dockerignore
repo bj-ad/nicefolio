@@ -1,0 +1,39 @@
+# Ignore environment files
+.env
+.env.*
+
+# Ignore active config files (may contain API keys, wallet addresses)
+config/*.yaml
+!config/*.yaml.template
+
+# Ignore data directories
+backups/
+logs/
+db-backups/
+
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore NiceGUI cache
+.nicegui/
+
+# Ignore development/migration data
+development/
+
+# Ignore IDE files
+.vs/
+.vscode/
+*.suo
+*.user
+
+# Ignore git directory
+.git/
+.gitignore
+
+# Ignore documentation that's not needed in the container
+docs/
+README.md
+readme.txt
+*.md.bak

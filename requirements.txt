@@ -1,0 +1,36 @@
+# UI Framework
+nicegui
+plotly
+
+# Blockchain & Crypto
+web3
+solana
+base58
+bech32
+bip32  # BIP32 library for xpub/zpub derivation (requires C compiler - installed via apt-get in Docker)
+
+# HTTP & Web
+requests
+beautifulsoup4
+
+# Data & Analysis
+pandas
+scipy
+matplotlib
+numpy
+
+# Database
+SQLAlchemy
+psycopg2-binary
+
+# Scheduling & Tasks
+schedule
+
+# Financial Data
+yfinance
+ibflex
+
+# Utilities
+python-dotenv
+pyyaml
+cachetools

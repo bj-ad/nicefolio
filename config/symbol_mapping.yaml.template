@@ -1,0 +1,166 @@
+# Symbol Mapping Configuration
+# Maps trading symbols to their market data providers and currencies
+#
+# This file provides DEFAULT mappings that are used as fallback when
+# a symbol is not found in the database SymbolMapping table.
+#
+# The SymbolMapping table is the PRIMARY source and gets auto-populated:
+# - New crypto symbols → Auto-mapped to USD via CoinMarketCap/yfinance
+# - New IBKR securities → Auto-mapped using currency from IBKR Flex Query
+# - Manual overrides → Can be added via database or this config
+#
+# Priority: Database SymbolMapping > This Config File > Hardcoded Defaults
+#
+# 🎯 BEST PRACTICE FOR EUROPEAN ETFs:
+# -----------------------------------
+# 1. ADD symbol to this file BEFORE first purchase
+# 2. Restart container to reload config
+# 3. Then execute your buy order
+# 4. Price sync will find the symbol in this file and auto-populate database
+#
+# Why? European securities need exchange suffix (e.g., VWCE.DE for XETRA)
+# Without this, yfinance won't find the ticker and price sync will fail.
+#
+# WHEN TO ADD ENTRIES:
+# - European securities needing exchange suffix (e.g., VWCE.DE, VUAA.AS)
+# - Special cases with non-standard providers
+# - Symbols where auto-detection fails
+#
+# WHEN NOT TO ADD:
+# - US securities (auto-detected correctly, no suffix needed)
+# - Crypto (auto-detected correctly, USD default)
+# - Anything that works with defaults
+
+# ============================================================================
+# MANUAL OVERRIDES (When auto-detection needs help)
+# ============================================================================
+
+# European ETFs (XETRA - Frankfurt)
+# These trade in EUR and need explicit yfinance exchange suffix
+#
+# 🔧 HOW TO ADD A NEW EUROPEAN ETF:
+# 1. Add entry here with correct exchange suffix (.DE, .AS, .L, etc.)
+# 2. Restart container: docker compose restart nicefolio_gui
+# 3. Execute your buy order through your broker
+# 4. Daily sync will find this entry and create database mapping
+
+# Example European ETF on XETRA (Frankfurt)
+VEUR:
+  yfinance_symbol: "VEUR.DE"
+  currency: "EUR"
+  exchange: "XETRA"
+  description: "Example European ETF (Vanguard FTSE Developed Europe)"
+  provider: "yfinance"
+
+# Example European ETF on Milan Exchange
+VUSD:
+  yfinance_symbol: "VUSD.MI"
+  currency: "EUR"
+  exchange: "Milan"
+  description: "Example European ETF (Vanguard S&P 500)"
+  provider: "yfinance"
+
+# Example sector ETF
+TECH:
+  yfinance_symbol: "TECH.MI"
+  currency: "EUR"
+  exchange: "Milan"
+  description: "Example Technology Sector ETF"
+  provider: "yfinance"
+
+# Example index ETF on XETRA
+INDX:
+  yfinance_symbol: "INDX.DE"
+  currency: "EUR"
+  exchange: "XETRA"
+  description: "Example Index ETF"
+  provider: "yfinance"
+
+# Example developed markets ETF
+DVLP:
+  yfinance_symbol: "DVLP.MI"
+  currency: "EUR"
+  exchange: "Milan"
+  description: "Vanguard FTSE Developed World UCITS ETF USD Accumulation"
+  provider: "yfinance"
+
+4GLD:
+  yfinance_symbol: "4GLD.DE"
+  currency: "EUR"
+  exchange: "XETRA"
+  description: "WisdomTree Physical Gold EUR Daily Hedged"
+  provider: "yfinance"
+
+# ============================================================================
+# US SECURITIES - NOT NEEDED IN CONFIG
+# ============================================================================
+# US securities (VOO, VGK, GLD, IAU, etc.) are auto-detected correctly:
+# - yfinance works with symbol as-is (no exchange suffix needed)
+# - Currency defaults to USD
+# - IBKR auto-population will handle these
+#
+# NO NEED TO LIST THEM HERE!
+
+# ============================================================================
+# CRYPTO - RARELY NEEDED IN CONFIG
+# ============================================================================
+# Crypto symbols are auto-detected and use USD by default.
+# CoinMarketCap is primary source, yfinance is fallback.
+#
+# Only add entries here if you need to:
+# - Force a specific provider (e.g., yfinance instead of CoinMarketCap)
+# - Use non-USD currency (e.g., BTC in EUR)
+#
+# Example overrides (uncomment if needed):
+#
+# BTC:
+#   yfinance_symbol: "BTC-USD"
+#   currency: "USD"
+#   provider: "yfinance"  # Force yfinance instead of CoinMarketCap
+#
+# ETH:
+#   yfinance_symbol: "ETH-EUR"
+#   currency: "EUR"
+#   provider: "yfinance"  # Fetch ETH in EUR instead of USD
+
+# ============================================================================
+# SPECIAL CASES
+# ============================================================================
+
+# Physical gold (uses gold scraper, not market data sync)
+# Listed here for documentation and to prevent accidental price sync
+GOLDTHB:
+  provider: "goldtraders_scraper"
+  currency: "THB"
+  description: "Physical Gold Baht (Gold Traders Thailand)"
+  auto_sync: false # ← Important: Prevents inclusion in daily price sync
+
+# ============================================================================
+# STABLECOINS - GERMAN TAX COMPLIANCE
+# ============================================================================
+# Stablecoins (USDT, USDC, BUSD, DAI, TUSD, USDP) are CRYPTO ASSETS, not fiat.
+#
+# Portfolio Allocation:
+#   - Stored in Portfolio 8 (Broker Cash Pool) for liquidity tracking
+#   - But tracked as crypto for tax purposes (NOT cash)
+#
+# Tax Treatment (German Tax Law):
+#   - Each stablecoin transaction is a TAXABLE EVENT
+#   - Cost basis tracking required (acquisition price)
+#   - FIFO allocation for lot tracking
+#   - 1-year HODL rule applies (determines tax rate)
+#
+# Trading Behavior:
+#   Example: Buy 0.01 BTC with 500 USDT creates TWO transactions:
+#     1. type='exchange', symbol='USDT', qty=-500 (disposal, taxable) → Portfolio 8
+#     2. type='exchange', symbol='BTC', qty=0.01 (acquisition) → Portfolio 6
+#
+# Price Tracking:
+#   - Auto-synced by sync_crypto_prices() just like other crypto
+#   - No symbol_mapping.yaml entries needed (default behavior)
+#   - CoinMarketCap → yfinance fallback chain
+#
+# Implementation:
+#   - Binance parsers detect stablecoin pairs automatically
+#   - See: crud/parsers/binancecom_parser.py, binanceth_parser.py
+#   - Stablecoin list: config/app_config.yaml (stablecoin_symbols)
