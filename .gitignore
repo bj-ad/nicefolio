@@ -8,6 +8,7 @@ __pycache__/
 .env.dev
 .env.prod
 .env.local
+!.env.example
 
 # Ignore active compose file (use templates instead)
 # Templates compose.prod.yaml and compose.dev.yaml are tracked
